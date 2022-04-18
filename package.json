@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/brandonfelty/tinyapp/issues"
   },
-  "homepage": "https://github.com/brandonfelty/tinyapp#readme"
+  "homepage": "https://github.com/brandonfelty/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.3"
+  }
 }
