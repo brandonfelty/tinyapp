@@ -23,8 +23,9 @@ const urlDatabase = {
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);
-  res.send("Ok");
+  const generatedURL = generateRandomString();
+  urlDatabase[generatedURL] = req.body.longURL;
+  res.redirect(`/urls/${generatedURL}`);
 });
 
 app.get('/', (req, res) => {
