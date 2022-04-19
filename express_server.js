@@ -22,6 +22,15 @@ const urlDatabase = {
 
 app.use(bodyParser.urlencoded({extended: true}));
 
+app.post("/urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  const longURL = req.body.newLongURL;
+  if (longURL) {
+    urlDatabase[shortURL] = longURL;
+  }  
+  res.redirect(`/urls/${shortURL}`)
+});
+
 app.post("/urls/:shortURL/delete", (req, res) =>{
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
@@ -52,7 +61,10 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
+  console.log(shortURL)
+  console.log(urlDatabase)
   const templateVars = { shortURL: shortURL, longURL: urlDatabase[shortURL]};
+  console.log(urlDatabase[shortURL]);
   if (urlDatabase[shortURL] !== undefined) {
     res.render("urls_show", templateVars);
   } else {
