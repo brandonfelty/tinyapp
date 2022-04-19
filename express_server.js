@@ -34,7 +34,7 @@ app.get("/u/:shortURL", (req, res) => {
   //console.log(shortURL);
   const longURL = urlDatabase[shortURL];
   res.redirect(`https://${longURL}`);
-})
+});
 
 app.get('/', (req, res) => {
   res.send("Hello!");
@@ -63,14 +63,19 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b><html>\n");
 });
 
-app.get("/set", (req, res) => {
-  const a = 1;
-  res.send(`a = ${a}`);
-});
 
-app.get('/fetch', (req, res) => {
-  res.send(`a = ${a}`);
-});
+// -- TEST CODE --
+
+// app.get("/set", (req, res) => {
+//   const a = 1;
+//   res.send(`a = ${a}`);
+// });
+
+// app.get('/fetch', (req, res) => {
+//   res.send(`a = ${a}`);
+// });
+
+// -- END TEST CODE --
 
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
