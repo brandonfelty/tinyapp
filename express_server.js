@@ -22,6 +22,12 @@ const urlDatabase = {
 
 app.use(bodyParser.urlencoded({extended: true}));
 
+app.post("/urls/:shortURL/delete", (req, res) =>{
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
+});
+
 app.post("/urls", (req, res) => {
   const generatedURL = generateRandomString();
   urlDatabase[generatedURL] = req.body.longURL;
