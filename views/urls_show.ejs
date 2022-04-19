@@ -7,12 +7,12 @@
 </head>
 
 <body>
+  <%- include('partials/_header') %>
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
         <p class="card-text">Short URL: <a href="/urls/<%= shortURL %>"><%= shortURL %></a></p>
-        <p class="card-text"> <a href="/u/<%= shortURL %>"> Create a new URL </a></p>
       </div>
     <div class="card-footer text-muted"></div>
   </div>
