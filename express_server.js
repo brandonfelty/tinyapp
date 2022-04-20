@@ -7,6 +7,15 @@ const generateRandomString = () => {
   return result;
 };
 
+const searchForEmail = (userDB, email) => {
+  for (const user in userDB) {
+    if (userDB[user].email === email) {
+      return true;
+    }
+  }
+  return false;
+};
+
 const express = require('express');
 const req = require('express/lib/request');
 const bodyParser = require('body-parser');
@@ -36,16 +45,26 @@ const templateVars = {
 // res.render("urls_new", templateVars);
 
 app.post("/register", (req, res) => {
-  const userRandomID = generateRandomString();
+  const userId = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
-  users[userRandomID] = {
-    userRandomID,
+  const user = users[userId];
+  
+  if (!email) {
+    return res.status(400).send('Invalid email');
+  }
+      
+  if (searchForEmail(users, email)) {
+    return res.status(400).send("Email is already in use");
+  }
+      
+  users[userId] = {
+    userId,
     email,
     password
   };
-  console.log("users", users)
-  res.cookie("user_id", userRandomID);
+
+  res.cookie("user_id", userId);
   res.redirect("/urls");
 });
 
@@ -83,11 +102,11 @@ app.post("/urls", (req, res) => {
 app.get('/register', (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
-  console.log(user) ;
+  //console.log(user) ;
   const templateVars = {
     user
   };
-  console.log(templateVars.user)
+  //console.log(templateVars.user)
   res.render("urls_registration", templateVars)
 });
 
