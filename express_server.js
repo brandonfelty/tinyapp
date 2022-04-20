@@ -100,7 +100,14 @@ app.post("/urls/:shortURL/delete", (req, res) =>{
 });
 
 app.post("/urls", (req, res) => {
+  const userId = req.cookies["user_id"];
+  if (!userId) {
+    return res.status(401).send("Please register or login to create tiny URLs")
+  }
+  
   const generatedURL = generateRandomString();
+
+
   urlDatabase[generatedURL] = req.body.longURL;
   res.redirect(`/urls/${generatedURL}`);
 });
