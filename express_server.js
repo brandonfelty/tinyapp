@@ -39,12 +39,12 @@ app.post("/register", (req, res) => {
   const userRandomID = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
-  users["userRandomID"] = {
+  users[userRandomID] = {
     userRandomID,
     email,
     password
   };
-  // console.log("users", users)
+  console.log("users", users)
   res.cookie("user_id", userRandomID);
   res.redirect("/urls");
 });
@@ -55,7 +55,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username"); 
+  res.clearCookie("user_id"); 
   res.redirect('/urls');
 });
 
@@ -81,9 +81,13 @@ app.post("/urls", (req, res) => {
 });
 
 app.get('/register', (req, res) => {
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+  console.log(user) ;
   const templateVars = {
-    username: req.cookies["username"]
+    user
   };
+  console.log(templateVars.user)
   res.render("urls_registration", templateVars)
 });
 
@@ -100,20 +104,24 @@ app.get('/', (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
   const templateVars = {
-    username: req.cookies["username"]
+    user
   };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  console.log(shortURL)
-  console.log(urlDatabase)
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+  // console.log(shortURL)
+  // console.log(urlDatabase)
   const templateVars = { 
+    user,
     shortURL: shortURL, 
-    longURL: urlDatabase[shortURL],
-    username: req.cookies["username"]
+    longURL: urlDatabase[shortURL]
   };
   console.log(urlDatabase[shortURL]);
   if (urlDatabase[shortURL] !== undefined) {
@@ -125,10 +133,13 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
   const templateVars = { 
-    username: req.cookies["username"],
+    user,
     urls: urlDatabase 
   };
+  //console.log(templateVars.user.email);
   res.render("urls_index", templateVars);
 });
 
