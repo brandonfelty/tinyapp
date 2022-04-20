@@ -22,6 +22,8 @@ const urlDatabase = {
   "9sm5xK": "www.google.com"
 };
 
+const users = {};
+
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
@@ -33,6 +35,19 @@ const templateVars = {
 // res.render("urls_show", templateVars);
 // res.render("urls_new", templateVars);
 
+app.post("/register", (req, res) => {
+  const userRandomID = generateRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
+  users["userRandomID"] = {
+    userRandomID,
+    email,
+    password
+  };
+  // console.log("users", users)
+  res.cookie("user_id", userRandomID);
+  res.redirect("/urls");
+});
 
 app.post("/login", (req, res) => {
   res.cookie('username', req.body.username);
@@ -63,6 +78,13 @@ app.post("/urls", (req, res) => {
   const generatedURL = generateRandomString();
   urlDatabase[generatedURL] = req.body.longURL;
   res.redirect(`/urls/${generatedURL}`);
+});
+
+app.get('/register', (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"]
+  };
+  res.render("urls_registration", templateVars)
 });
 
 app.get("/u/:shortURL", (req, res) => {
