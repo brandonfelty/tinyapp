@@ -33,16 +33,8 @@ const urlDatabase = {
 
 const users = {};
 
-
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
-
-const templateVars = {
-  //username: req.cookies["username"],
-};
-// res.render("urls_index", templateVars);
-// res.render("urls_show", templateVars);
-// res.render("urls_new", templateVars);
 
 app.post("/register", (req, res) => {
   const userId = generateRandomString();
@@ -69,8 +61,22 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect('/urls');
+  const email = req.body.email;
+  const password = req.body.password;
+
+  // email not found
+
+  if (!searchForEmail(users, email)) {
+    return res.status(403).send("Email cannot be found");
+  }
+  
+  for (const user in users) {
+    if (users[user].password === password) {
+      res.cookie("user_id", users[user].userId)
+      return res.redirect('/urls');
+    }
+  }
+  return res.status(403).send("Password incorrect")
 });
 
 app.post("/logout", (req, res) => {
