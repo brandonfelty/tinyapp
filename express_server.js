@@ -22,8 +22,17 @@ const urlDatabase = {
   "9sm5xK": "www.google.com"
 };
 
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+
+const templateVars = {
+  //username: req.cookies["username"],
+};
+// res.render("urls_index", templateVars);
+// res.render("urls_show", templateVars);
+// res.render("urls_new", templateVars);
+
 
 app.post("/login", (req, res) => {
   res.cookie('username', req.body.username);
@@ -64,6 +73,9 @@ app.get('/', (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"]
+  };
   res.render("urls_new");
 });
 
@@ -71,7 +83,11 @@ app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   console.log(shortURL)
   console.log(urlDatabase)
-  const templateVars = { shortURL: shortURL, longURL: urlDatabase[shortURL]};
+  const templateVars = { 
+    shortURL: shortURL, 
+    longURL: urlDatabase[shortURL],
+    username: req.cookies["username"]
+  };
   console.log(urlDatabase[shortURL]);
   if (urlDatabase[shortURL] !== undefined) {
     res.render("urls_show", templateVars);
@@ -79,6 +95,14 @@ app.get("/urls/:shortURL", (req, res) => {
     res.status = 404;
     res.send("404 Page Not Found");
   }
+});
+
+app.get("/urls", (req, res) => {
+  const templateVars = { 
+    username: req.cookies["username"],
+    urls: urlDatabase 
+  };
+  res.render("urls_index", templateVars);
 });
 
 app.get("/urls.json", (req, res) => {
@@ -103,10 +127,6 @@ app.get("/hello", (req, res) => {
 
 // -- END TEST CODE --
 
-app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
-  res.render("urls_index", templateVars);
-});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
