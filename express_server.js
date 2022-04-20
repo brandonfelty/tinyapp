@@ -99,6 +99,16 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${generatedURL}`);
 });
 
+app.get('/login', (req, res) => {
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+  const templateVars = {
+    user
+  };
+  res.render("urls_login", templateVars);
+});
+
+
 app.get('/register', (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
