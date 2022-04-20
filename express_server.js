@@ -10,8 +10,10 @@ const generateRandomString = () => {
 const express = require('express');
 const req = require('express/lib/request');
 const bodyParser = require('body-parser');
+const res = require('express/lib/response');
 const app = express();
 const PORT = 8080;
+const cookieParser = require('cookie-parser');
 
 app.set("view engine", "ejs");
 
@@ -21,6 +23,12 @@ const urlDatabase = {
 };
 
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
+
+app.post("/login", (req, res) => {
+  res.cookie('username', req.body.username);
+  res.redirect('/urls');
+});
 
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
