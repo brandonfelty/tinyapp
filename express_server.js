@@ -101,8 +101,8 @@ app.post("/logout", (req, res) => {
   res.redirect('/urls');
 });
 
-app.post("/urls/:shortURL/delete", (req, res) =>{
-  const shortURL = req.params.shortURL;
+app.post("/urls/:id/delete", (req, res) =>{
+  const shortURL = req.params.id;
   const userId = req.cookies["user_id"];
   const user = users[userId];
   
@@ -162,23 +162,36 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${generatedURL}`);
 });
 
-app.get('/login', (req, res) => {
-  const userId = req.cookies["user_id"];
-  const user = users[userId];
-  const templateVars = {
-    user
-  };
-  res.render("urls_login", templateVars);
-});
-
-
 app.get('/register', (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
+
+  // If user is logged in, redirect to /urls
+  if (user) {
+    return res.redirect("/urls");
+  }
+
+  // If user is not logged in, render the registration page
   const templateVars = {
     user
   };
   res.render("urls_registration", templateVars)
+});
+
+app.get('/login', (req, res) => {
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+
+  // If user is logged in, redirect to /urls
+  if (user) {
+    return res.redirect("/urls")
+  }
+
+  // If user is not logged in, the login page is rendered
+  const templateVars = {
+    user
+  };
+  res.render("urls_login", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
