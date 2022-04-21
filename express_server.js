@@ -33,8 +33,9 @@ const bodyParser = require('body-parser');
 const res = require('express/lib/response');
 const app = express();
 const PORT = 8080;
-const cookieParser = require('cookie-parser');
+// const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
+const cookieSession = require('cookie-session');
 
 app.set("view engine", "ejs");
 
@@ -52,12 +53,14 @@ const urlDatabase = {
 const users = {};
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+app.use(cookieSession({name: 'session', keys: ['secretKey']}));
+// app.use(cookieParser());
 
 app.post("/logout", (req, res) => {
 
   // Clears user cookie and redirects to /urls
-  res.clearCookie("user_id"); 
+  // res.clearCookie("user_id"); 
+  req.session = null;
   res.redirect('/urls');
 });
 
@@ -84,7 +87,7 @@ app.post("/register", (req, res) => {
     email,
     password: hashedPassword
   };
-  res.cookie("user_id", userId);
+  req.session.user_id = userId;
   res.redirect("/urls");
 });
 
@@ -104,13 +107,13 @@ app.post("/login", (req, res) => {
   }
   
   // If the user's email and hashed password are a match, the user is logged in and redirected to /urls
-  res.cookie("user_id", user.userId)
+  req.session.user_id = user.userId;
   return res.redirect('/urls');
 });
 
 app.post("/urls/:id/delete", (req, res) =>{
   const shortURL = req.params.id;
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const user = users[userId];
   
   // If the user is not logged in, return html with error message
@@ -130,10 +133,11 @@ app.post("/urls/:id/delete", (req, res) =>{
 });
 
 app.post("/urls/:id", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const shortURL = req.params.id;
   const longURL = req.body.newLongURL;
   const user = users[userId];
+  console.log(req.body)
 
   // Checks if the user is logged in and returns HTML with error if they're not
   if (!user) {
@@ -142,17 +146,17 @@ app.post("/urls/:id", (req, res) => {
 
   // If user is logged in but does not own the URL for the given ID return html with error message
   const userDB = urlsForUser(userId);
+  console.log(userDB)
   if (!userDB[shortURL]) {
     return res.status(401).send("You are not authorized to edit this short URL");
   }
 
-  // If user is logged in and owns the URLs the existing long URL is updated and the user is redirected to /urls/:id
-  urlDatabase[shortURL].longURL = longURL;
+  // If user is logged in and owns the URLs the user is redirected to /urls/:id so they can edit the long url
   res.redirect(`/urls/${shortURL}`)
 });
 
 app.post("/urls", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const generatedURL = generateRandomString();
   const user = users[userId];
 
@@ -170,7 +174,7 @@ app.post("/urls", (req, res) => {
 });
 
 app.get('/register', (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const user = users[userId];
 
   // If user is logged in, redirect to /urls
@@ -186,7 +190,7 @@ app.get('/register', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const user = users[userId];
 
   // If user is logged in, redirect to /urls
@@ -217,7 +221,7 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const user = users[userId];
   
   // checks if the user is logged in or send to login page
@@ -227,7 +231,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const user = users[userId];
 
   // if user is not logged in an error message is sent 
@@ -260,7 +264,7 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const user = users[userId]; 
   
   // if user is not logged on, it will show an error message and HTML
@@ -282,7 +286,7 @@ app.get("/urls", (req, res) => {
 app.get('/', (req, res) => {
   
   // if user logged in redirect to /urls
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const user = users[userId];
   if (user) {
     return res.redirect("/urls");
