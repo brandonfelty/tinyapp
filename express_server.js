@@ -1,31 +1,3 @@
-const generateRandomString = () => {
-  let result = '';
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 0; i < 6; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-};
-
-const searchForEmail = (userDB, email) => {
-  for (const user in userDB) {
-    if (userDB[user].email === email) {
-      return userDB[user];
-    }
-  }
-  return false;
-};
-
-const urlsForUser = (id) => {
-  let userDB = {};
-  for (const shortURL in urlDatabase) {
-    //console.log(urlDatabase)
-   if (urlDatabase[shortURL].userID === id) {
-     userDB[shortURL] = urlDatabase[shortURL].longURL;
-   }
- };
- return userDB;
-}
 
 const express = require('express');
 const req = require('express/lib/request');
@@ -36,6 +8,11 @@ const PORT = 8080;
 // const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
+const helpers = require('./helpers.js');
+const generateRandomString = helpers.generateRandomString;
+const searchForEmail = helpers.searchForEmail;
+const urlsForUser = helpers.urlsForUser;
+
 
 app.set("view engine", "ejs");
 
@@ -75,7 +52,7 @@ app.post("/register", (req, res) => {
   if (!email || !password) {
     return res.status(400).send('Invalid email or password');
   }
-  
+
   // Uses a function to check if the email exists, if the function returns false, an error message comes up to tell the user the email is already in use
   if (searchForEmail(users, email)) {
     return res.status(400).send("Email is already in use");
@@ -99,9 +76,11 @@ app.post("/login", (req, res) => {
   if (!searchForEmail(users, email)) {
     return res.status(403).send("Email cannot be found <a href=\"/login\"> Login</a>");
   }
-  
-  // Uses bcryptjs to check password for the user and if hashed password doesn't match the user receives an error
+
+  // Since we would return the error above if no user, now we set a user variable that grabs the unique user object 
   const user = searchForEmail(users, email)
+
+  // Uses bcryptjs to check password for the user and if hashed password doesn't match the user receives an error
   if (!bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("Password incorrect <a href=\"/login\"> Login</a>");
   }
@@ -122,7 +101,7 @@ app.post("/urls/:id/delete", (req, res) =>{
   }
   
   // If the user is logged in but doesn't own the URL for the ID, return html with error message
-  const userDB = urlsForUser(userId);
+  const userDB = urlsForUser(userId, urlDatabase);
   if (!userDB[shortURL]) {
     return res.status(401).send("You are not authorized to delete this short URL");
   }
@@ -145,7 +124,7 @@ app.post("/urls/:id", (req, res) => {
   }
 
   // If user is logged in but does not own the URL for the given ID return html with error message
-  const userDB = urlsForUser(userId);
+  const userDB = urlsForUser(userId, urlDatabase);
   console.log(userDB)
   if (!userDB[shortURL]) {
     return res.status(401).send("You are not authorized to edit this short URL");
@@ -274,8 +253,8 @@ app.get("/urls", (req, res) => {
   }
 
   // need to call after the user is verified or will receive an error. The function below will return all the urls associated with the user.
-  const userDB = urlsForUser(userId);
-  
+  const userDB = urlsForUser(userId, urlDatabase);
+  console.log(userDB)
   const templateVars = { 
     user,
     urls: userDB
