@@ -53,33 +53,36 @@ const users = {};
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
+app.post("/logout", (req, res) => {
+  res.clearCookie("user_id"); 
+  res.redirect('/urls');
+});
+
 app.post("/register", (req, res) => {
   const userId = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
-  const user = users[userId];
   
-  if (!email) {
-    return res.status(400).send('Invalid email');
+  // Checks if the user email or password contents were empty adn returns error if they are empty
+  if (!email || !password) {
+    return res.status(400).send('Invalid email or password');
   }
-      
+  
+  // Uses a function to check if the email exists, if the function returns false, an error message comes up to tell the user the email is already in use
   if (searchForEmail(users, email)) {
     return res.status(400).send("Email is already in use");
   }
-      
+  
+  // If email and password fields meet requirements, a new user is created with a new cookie and redirects to urls
+
+  // Still need to add encription
   users[userId] = {
     userId,
     email,
     password
   };
-
   res.cookie("user_id", userId);
   res.redirect("/urls");
-});
-
-app.post("/logout", (req, res) => {
-  res.clearCookie("user_id"); 
-  res.redirect('/urls');
 });
 
 app.post("/login", (req, res) => {
