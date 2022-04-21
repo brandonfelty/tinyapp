@@ -34,6 +34,7 @@ const res = require('express/lib/response');
 const app = express();
 const PORT = 8080;
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
 
 app.set("view engine", "ejs");
 
@@ -64,6 +65,7 @@ app.post("/register", (req, res) => {
   const userId = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   
   // Checks if the user email or password contents were empty adn returns error if they are empty
   if (!email || !password) {
@@ -81,8 +83,9 @@ app.post("/register", (req, res) => {
   users[userId] = {
     userId,
     email,
-    password
+    password: hashedPassword
   };
+  console.log(users)
   res.cookie("user_id", userId);
   res.redirect("/urls");
 });
