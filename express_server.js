@@ -1,4 +1,3 @@
-
 const express = require('express');
 const req = require('express/lib/request');
 const bodyParser = require('body-parser');
@@ -204,10 +203,17 @@ app.get("/urls/new", (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
   
-  // checks if the user is logged in or send to login page
+  // checks if the user is logged in and send to login page if not
   if (!user) {
     return res.redirect("/login");
   }
+  const templateVars = {
+    user
+  };
+
+  // render the HTML that allows users to create a new short url
+  res.render("urls_new", templateVars);
+});
 
 app.get("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
@@ -231,16 +237,6 @@ app.get("/urls/:id", (req, res) => {
     res.status = 404;
     res.send("404 Page Not Found");
   }
-});
-
-
-
-  const templateVars = {
-    user
-  };
-
-  // render the HTML that allows users to create a new short url
-  res.render("urls_new", templateVars);
 });
 
 app.get("/urls", (req, res) => {
