@@ -27,8 +27,14 @@ const cookieParser = require('cookie-parser');
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  "b2xVn2": "www.lighthouselabs.ca",
-  "9sm5xK": "www.google.com"
+  "b6UTxQ": { 
+          longURL: "www.tsn.ca",
+          userID: "aJ48lW"
+    },
+    "9sm5xK": {
+          longURL: "www.google.com",
+          userID: "aJ48lW"
+    }
 };
 
 const users = {};
@@ -85,10 +91,16 @@ app.post("/logout", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
+  const userId = req.cookies["user_id"];
   const shortURL = req.params.shortURL;
   const longURL = req.body.newLongURL;
+  console.log(userId);
+
+  for (const shortURL in urlDatabase) {
+    console.log(shortURL);
+  }
   if (longURL) {
-    urlDatabase[shortURL] = longURL;
+    urlDatabase[shortURL].longURL = longURL;
   }  
   res.redirect(`/urls/${shortURL}`)
 });
@@ -101,14 +113,16 @@ app.post("/urls/:shortURL/delete", (req, res) =>{
 
 app.post("/urls", (req, res) => {
   const userId = req.cookies["user_id"];
+  const generatedURL = generateRandomString();
   if (!userId) {
     return res.status(401).send("Please register or login to create tiny URLs")
   }
-  
-  const generatedURL = generateRandomString();
-
-
-  urlDatabase[generatedURL] = req.body.longURL;
+  //console.log(req.body.longURL)
+  urlDatabase[generatedURL] = {
+    longURL: req.body.longURL,
+    userID: userId  
+  }
+  //console.log(urlDatabase[generatedURL])
   res.redirect(`/urls/${generatedURL}`);
 });
 
@@ -135,7 +149,7 @@ app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   //const longURL = urlDatabase[shortURL];
   //console.log(shortURL);
-  const longURL = urlDatabase[shortURL];
+  const longURL = urlDatabase[shortURL].longURL;
   res.redirect(`https://${longURL}`);
 });
 
@@ -156,14 +170,15 @@ app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const userId = req.cookies["user_id"];
   const user = users[userId];
-  // console.log(shortURL)
-  // console.log(urlDatabase)
+  console.log(urlDatabase)
+  //console.log(urlDatabase[])
+
   const templateVars = { 
     user,
     shortURL: shortURL, 
-    longURL: urlDatabase[shortURL]
+    longURL: urlDatabase[shortURL].longURL
   };
-  console.log(urlDatabase[shortURL]);
+  //console.log(urlDatabase[shortURL].longURL);
   if (urlDatabase[shortURL] !== undefined) {
     res.render("urls_show", templateVars);
   } else {
@@ -174,12 +189,23 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const userId = req.cookies["user_id"];
-  const user = users[userId];
+  const user = users[userId]; 
+  let userDB = {};
+  if (user) {
+    for (const shortURL in urlDatabase) {
+       //console.log(urlDatabase)
+      if (urlDatabase[shortURL].userID === userId) {
+        userDB[shortURL] = urlDatabase[shortURL].longURL;
+      }
+    };
+  }
+  //console.log(userId);
   const templateVars = { 
     user,
-    urls: urlDatabase 
-  };
-  //console.log(templateVars.user.email);
+    urls: userDB
+}
+  //console.log(userDB)
+  //console.log(userDB);
   res.render("urls_index", templateVars);
 });
 
