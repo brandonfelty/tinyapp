@@ -105,7 +105,11 @@ app.post("/urls/:shortURL", (req, res) => {
   const userId = req.cookies["user_id"];
   const shortURL = req.params.shortURL;
   const longURL = req.body.newLongURL;
-  console.log(userId);
+  const user = users[userId];
+
+  if (!user) {
+    return res.status(401).send("You are not authorized to edit this short URL")
+  }
 
   urlDatabase[shortURL].longURL = longURL;
     
@@ -114,6 +118,11 @@ app.post("/urls/:shortURL", (req, res) => {
 
 app.post("/urls/:shortURL/delete", (req, res) =>{
   const shortURL = req.params.shortURL;
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+  if (!user) {
+    return res.status(401).send("You are not authorized to delete this short URL")
+  }
   delete urlDatabase[shortURL];
   res.redirect("/urls");
 });
@@ -122,7 +131,7 @@ app.post("/urls", (req, res) => {
   const userId = req.cookies["user_id"];
   const generatedURL = generateRandomString();
   if (!userId) {
-    return res.status(401).send("Please register or login to create tiny URLs")
+    return res.status(401).send("Please register or login to create tiny URLs <a href=\"/register\" >Register</a> <a href=\"/login\" >Login</a>")
   }
   //console.log(req.body.longURL)
   urlDatabase[generatedURL] = {
@@ -206,7 +215,7 @@ app.get("/urls", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId]; 
   if (!user) {
-    return res.status(401).send("Please login to see your urls")
+    return res.status(401).send("Please login to see your urls <a href=\"/register\" >Register</a> <a href=\"/login\" >Login</a>")
   }
   const userDB = urlsForUser(userId);
     // for (const shortURL in urlDatabase) {
