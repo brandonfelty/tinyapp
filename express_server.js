@@ -210,20 +210,19 @@ app.get("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   const userId = req.cookies["user_id"];
   const user = users[userId];
-  //console.log(urlDatabase)
-  console.log(urlDatabase[shortURL])
-  console.log(user)
+
+  // if user is not logged in an error message is sent 
   if (!user) {
-    return res.status(401).send("Please login to see your urls")
+    return res.status(401).send("Please login to see your urls <a href=\"/register\" >Register</a> <a href=\"/login\" >Login</a>")
   }
-  if (urlDatabase[shortURL]) {
   
+  // checks if there is an entry in the database with the short url id and if exists in the database it renders HTML or it will error if the page is not found
+  if (urlDatabase[shortURL]) {
   const templateVars = { 
     user,
     shortURL: shortURL, 
     longURL: urlDatabase[shortURL].longURL
   };
-  //console.log(urlDatabase[shortURL].longURL);
     res.render("urls_show", templateVars);
   } else {
     res.status = 404;
