@@ -130,15 +130,19 @@ app.post("/urls/:shortURL/delete", (req, res) =>{
 app.post("/urls", (req, res) => {
   const userId = req.cookies["user_id"];
   const generatedURL = generateRandomString();
-  if (!userId) {
+  const user = users[userId];
+
+  // Checks if a user is logged in and returns an error if not logged in
+  if (!user) {
     return res.status(401).send("Please register or login to create tiny URLs <a href=\"/register\" >Register</a> <a href=\"/login\" >Login</a>")
   }
-  //console.log(req.body.longURL)
-  urlDatabase[generatedURL] = {
+  
+  // If the user is logged in, a shortURL is generated and then the user is redirected to /urls/:id
+  const shortURL = urlDatabase[generatedURL];
+  shortURL = {
     longURL: req.body.longURL,
     userID: userId  
   }
-  //console.log(urlDatabase[generatedURL])
   res.redirect(`/urls/${generatedURL}`);
 });
 
@@ -163,47 +167,17 @@ app.get('/register', (req, res) => {
 
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
-  //const longURL = urlDatabase[shortURL];
+
+  // searches through the short URL's in database and redirects to the long URL if it exists
   for (const key in urlDatabase) {
     if (key === shortURL) {
       const longURL = urlDatabase[shortURL].longURL;
       return res.redirect(`https://${longURL}`);
     }
   }
+
+  // If the URL for the given ID doesn't exist, returns HTML with error message
   res.status(404).send("Short URL does not exist");
-});
-
-app.get('/', (req, res) => {
-  
-  // if user logged in redirect to /urls
-  const userId = req.cookies["user_id"];
-  const user = users[userId];
-  if (user) {
-    return res.redirect("/urls");
-  }
-
-  // if user logged in redirect to /urls
-  if (!user) {
-    return res.redirect("/login");
-  }
-
-});
-
-app.get("/urls/new", (req, res) => {
-  const userId = req.cookies["user_id"];
-  const user = users[userId];
-
-  // checks if the user is logged in or send to login page
-  if (!user) {
-    return res.redirect("/login");
-  }
-
-  const templateVars = {
-    user
-  };
-
-  // render the HTML that allows users to create a new short url
-  res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -230,6 +204,23 @@ app.get("/urls/:id", (req, res) => {
   }
 });
 
+app.get("/urls/new", (req, res) => {
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+  
+  // checks if the user is logged in or send to login page
+  if (!user) {
+    return res.redirect("/login");
+  }
+
+  const templateVars = {
+    user
+  };
+
+  // render the HTML that allows users to create a new short url
+  res.render("urls_new", templateVars);
+});
+
 app.get("/urls", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId]; 
@@ -248,6 +239,22 @@ app.get("/urls", (req, res) => {
 }
   // Renders the HTML for when a user is logged in
   res.render("urls_index", templateVars);
+});
+
+app.get('/', (req, res) => {
+  
+  // if user logged in redirect to /urls
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+  if (user) {
+    return res.redirect("/urls");
+  }
+
+  // if user logged in redirect to /urls
+  if (!user) {
+    return res.redirect("/login");
+  }
+
 });
 
 app.listen(PORT, () => {
