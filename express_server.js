@@ -192,9 +192,17 @@ app.get('/', (req, res) => {
 app.get("/urls/new", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
+
+  // checks if the user is logged in or send to login page
+  if (!user) {
+    return res.redirect("/login");
+  }
+
   const templateVars = {
     user
   };
+
+  // render the HTML that allows users to create a new short url
   res.render("urls_new", templateVars);
 });
 
@@ -242,29 +250,6 @@ app.get("/urls", (req, res) => {
   // Renders the HTML for when a user is logged in
   res.render("urls_index", templateVars);
 });
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b><html>\n");
-});
-
-
-// -- TEST CODE --
-
-// app.get("/set", (req, res) => {
-//   const a = 1;
-//   res.send(`a = ${a}`);
-// });
-
-// app.get('/fetch', (req, res) => {
-//   res.send(`a = ${a}`);
-// });
-
-// -- END TEST CODE --
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
