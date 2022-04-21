@@ -101,6 +101,27 @@ app.post("/logout", (req, res) => {
   res.redirect('/urls');
 });
 
+app.post("/urls/:shortURL/delete", (req, res) =>{
+  const shortURL = req.params.shortURL;
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+  
+  // If the user is not logged in, return html with error message
+  if (!user) {
+    return res.status(401).send("Please login to delete this short URL <a href=\"/login\" >Login</a>")
+  }
+  
+  // If the user is logged in but doesn't own the URL for the ID, return html with error message
+  const userDB = urlsForUser(userId);
+  if (!userDB[shortURL]) {
+    return res.status(401).send("You are not authorized to delete this short URL");
+  }
+
+  // If the user is logged in and owns the URL, the short URL is deleted from the database
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
+});
+
 app.post("/urls/:id", (req, res) => {
   const userId = req.cookies["user_id"];
   const shortURL = req.params.id;
@@ -121,17 +142,6 @@ app.post("/urls/:id", (req, res) => {
   // If user is logged in and owns the URLs the existing long URL is updated and the user is redirected to /urls/:id
   urlDatabase[shortURL].longURL = longURL;
   res.redirect(`/urls/${shortURL}`)
-});
-
-app.post("/urls/:shortURL/delete", (req, res) =>{
-  const shortURL = req.params.shortURL;
-  const userId = req.cookies["user_id"];
-  const user = users[userId];
-  if (!user) {
-    return res.status(401).send("You are not authorized to delete this short URL")
-  }
-  delete urlDatabase[shortURL];
-  res.redirect("/urls");
 });
 
 app.post("/urls", (req, res) => {
