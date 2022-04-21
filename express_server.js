@@ -62,6 +62,7 @@ app.post("/logout", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
+  // First we define a random userID, and store the email and password inputs from the request. Then the password is hashed for security.
   const userId = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
@@ -77,15 +78,12 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Email is already in use");
   }
   
-  // If email and password fields meet requirements, a new user is created with a new cookie and redirects to urls
-
-  // Still need to add encription
+  // If email and password fields meet requirements, a new user is created with the hased password. The server responds with a new cookie and redirects to urls.
   users[userId] = {
     userId,
     email,
     password: hashedPassword
   };
-  console.log(users)
   res.cookie("user_id", userId);
   res.redirect("/urls");
 });
@@ -99,13 +97,13 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Email cannot be found <a href=\"/login\"> Login</a>");
   }
   
-  // Checks if password given matches what is in the database for the user and if not the user receives an error
+  // Uses bcryptjs to check password for the user and if hashed password doesn't match the user receives an error
   const user = searchForEmail(users, email)
-  if (user.password !== password) {
+  if (!bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("Password incorrect <a href=\"/login\"> Login</a>");
   }
   
-  // If password and email match the database, the user is logged in and redirected to /urls
+  // If the user's email and hashed password are a match, the user is logged in and redirected to /urls
   res.cookie("user_id", user.userId)
   return res.redirect('/urls');
 });
