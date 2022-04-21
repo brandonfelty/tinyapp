@@ -174,7 +174,19 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.send("Hello!");
+  
+  // if user logged in redirect to /urls
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+  if (user) {
+    return res.redirect("/urls");
+  }
+
+  // if user logged in redirect to /urls
+  if (!user) {
+    return res.redirect("/login");
+  }
+
 });
 
 app.get("/urls/new", (req, res) => {
@@ -214,23 +226,20 @@ app.get("/urls/:id", (req, res) => {
 app.get("/urls", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId]; 
+  
+  // if user is not logged on, it will show an error message and HTML
   if (!user) {
     return res.status(401).send("Please login to see your urls <a href=\"/register\" >Register</a> <a href=\"/login\" >Login</a>")
   }
+
+  // need to call after the user is verified or will receive an error. The function below will return all the urls associated with the user.
   const userDB = urlsForUser(userId);
-    // for (const shortURL in urlDatabase) {
-    //    //console.log(urlDatabase)
-    //   if (urlDatabase[shortURL].userID === userId) {
-    //     userDB[shortURL] = urlDatabase[shortURL].longURL;
-    //   }
   
-  //console.log(userId);
   const templateVars = { 
     user,
     urls: userDB
 }
-  //console.log(userDB)
-  //console.log(userDB);
+  // Renders the HTML for when a user is logged in
   res.render("urls_index", templateVars);
 });
 
