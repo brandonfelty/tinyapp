@@ -57,7 +57,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Email is already in use");
   }
   
-  // If email and password fields meet requirements, a new user is created with the hased password. The server responds with a new cookie and redirects to urls.
+  // If email and password fields meet requirements, a new user is created with the hashed password. The server responds with a new cookie and redirects to urls.
   users[userId] = {
     userId,
     email,
@@ -84,7 +84,7 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Password incorrect <a href=\"/login\"> Login</a>");
   }
   
-  // If the user's email and hashed password are a match, the user is logged in and redirected to /urls
+  // If the user's email and hashed password are a match, a cookie is set, the user is logged in and redirected to /urls
   req.session.user_id = user.userId;
   return res.redirect('/urls');
 });
@@ -124,14 +124,13 @@ app.post("/urls/:id", (req, res) => {
 
   // If user is logged in but does not own the URL for the given ID return html with error message
   const userDB = urlsForUser(userId, urlDatabase);
-  console.log(userDB)
   if (!userDB[shortURL]) {
     return res.status(401).send("You are not authorized to edit this short URL");
   }
 
   // If user is logged in and owns the URLs the user is redirected to /urls/:id so they can edit the long url
   urlDatabase[shortURL].longURL = longURL;
-  res.redirect(`/urls/${shortURL}`)
+  res.redirect("/urls")
 });
 
 app.post("/urls", (req, res) => {
@@ -144,7 +143,7 @@ app.post("/urls", (req, res) => {
     return res.status(401).send("Please register or login to create tiny URLs <a href=\"/register\" >Register</a> <a href=\"/login\" >Login</a>")
   }
   
-  // If the user is logged in, a shortURL is generated and then the user is redirected to /urls/:id
+  // If the user is logged in, a shortURL is generated, saved to the database, and then the user is redirected to /urls/:id of the new url
   urlDatabase[generatedURL] = {
     longURL: req.body.longURL,
     userID: userId  
@@ -224,6 +223,17 @@ app.get("/urls/:id", (req, res) => {
   if (!user) {
     return res.status(401).send("Please login to see your urls <a href=\"/register\" >Register</a> <a href=\"/login\" >Login</a>")
   }
+
+  if (!urlDatabase[shortURL]) {
+    res.status = 404;
+    res.send("404 Page Not Found");  
+  }
+
+  // If user is logged in but does not own the URL for the given ID return html with error message
+   const userDB = urlsForUser(userId, urlDatabase);
+  if (!userDB[shortURL]) {
+    return res.status(401).send("You are not authorized to edit this short URL");
+  }
   
   // checks if there is an entry in the database with the short url id and if exists in the database it renders HTML or it will error if the page is not found
   if (urlDatabase[shortURL]) {
@@ -233,10 +243,7 @@ app.get("/urls/:id", (req, res) => {
     longURL: urlDatabase[shortURL].longURL
   };
     res.render("urls_show", templateVars);
-  } else {
-    res.status = 404;
-    res.send("404 Page Not Found");
-  }
+  } 
 });
 
 app.get("/urls", (req, res) => {
@@ -250,7 +257,6 @@ app.get("/urls", (req, res) => {
 
   // need to call after the user is verified or will receive an error. The function below will return all the urls associated with the user.
   const userDB = urlsForUser(userId, urlDatabase);
-  console.log(userDB)
   const templateVars = { 
     user,
     urls: userDB
