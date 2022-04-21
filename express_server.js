@@ -152,6 +152,7 @@ app.post("/urls/:id", (req, res) => {
   }
 
   // If user is logged in and owns the URLs the user is redirected to /urls/:id so they can edit the long url
+  urlDatabase[shortURL].longURL = longURL;
   res.redirect(`/urls/${shortURL}`)
 });
 
