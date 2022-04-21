@@ -10,7 +10,7 @@ const generateRandomString = () => {
 const searchForEmail = (userDB, email) => {
   for (const user in userDB) {
     if (userDB[user].email === email) {
-      return true;
+      return userDB[user];
     }
   }
   return false;
@@ -77,28 +77,29 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
+app.post("/logout", (req, res) => {
+  res.clearCookie("user_id"); 
+  res.redirect('/urls');
+});
+
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  // email not found
-
+  // Checks if email is in the database and returns error if none
   if (!searchForEmail(users, email)) {
-    return res.status(403).send("Email cannot be found");
+    return res.status(403).send("Email cannot be found <a href=\"/login\"> Login</a>");
   }
   
-  for (const user in users) {
-    if (users[user].password === password) {
-      res.cookie("user_id", users[user].userId)
-      return res.redirect('/urls');
-    }
+  // Checks if password given matches what is in the database for the user and if not the user receives an error
+  const user = searchForEmail(users, email)
+  if (user.password !== password) {
+    return res.status(403).send("Password incorrect <a href=\"/login\"> Login</a>");
   }
-  return res.status(403).send("Password incorrect")
-});
-
-app.post("/logout", (req, res) => {
-  res.clearCookie("user_id"); 
-  res.redirect('/urls');
+  
+  // If password and email match the database, the user is logged in and redirected to /urls
+  res.cookie("user_id", user.userId)
+  return res.redirect('/urls');
 });
 
 app.post("/urls/:id/delete", (req, res) =>{
