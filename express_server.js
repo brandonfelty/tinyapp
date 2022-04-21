@@ -54,6 +54,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
 app.post("/logout", (req, res) => {
+
+  // Clears user cookie and redirects to /urls
   res.clearCookie("user_id"); 
   res.redirect('/urls');
 });
