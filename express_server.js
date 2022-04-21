@@ -96,12 +96,8 @@ app.post("/urls/:shortURL", (req, res) => {
   const longURL = req.body.newLongURL;
   console.log(userId);
 
-  for (const shortURL in urlDatabase) {
-    console.log(shortURL);
-  }
-  if (longURL) {
-    urlDatabase[shortURL].longURL = longURL;
-  }  
+  urlDatabase[shortURL].longURL = longURL;
+    
   res.redirect(`/urls/${shortURL}`)
 });
 
@@ -145,12 +141,16 @@ app.get('/register', (req, res) => {
   res.render("urls_registration", templateVars)
 });
 
-app.get("/u/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL;
+app.get("/u/:id", (req, res) => {
+  const shortURL = req.params.id;
   //const longURL = urlDatabase[shortURL];
-  //console.log(shortURL);
-  const longURL = urlDatabase[shortURL].longURL;
-  res.redirect(`https://${longURL}`);
+  for (const key in urlDatabase) {
+    if (key === shortURL) {
+      const longURL = urlDatabase[shortURL].longURL;
+      return res.redirect(`https://${longURL}`);
+    }
+  }
+  res.status(404).send("Short URL does not exist");
 });
 
 app.get('/', (req, res) => {
