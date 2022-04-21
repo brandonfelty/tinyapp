@@ -16,6 +16,17 @@ const searchForEmail = (userDB, email) => {
   return false;
 };
 
+const urlsForUser = (id) => {
+  let userDB = {};
+  for (const shortURL in urlDatabase) {
+    //console.log(urlDatabase)
+   if (urlDatabase[shortURL].userID === id) {
+     userDB[shortURL] = urlDatabase[shortURL].longURL;
+   }
+ };
+ return userDB;
+}
+
 const express = require('express');
 const req = require('express/lib/request');
 const bodyParser = require('body-parser');
@@ -166,20 +177,24 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-app.get("/urls/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL;
+app.get("/urls/:id", (req, res) => {
+  const shortURL = req.params.id;
   const userId = req.cookies["user_id"];
   const user = users[userId];
-  console.log(urlDatabase)
-  //console.log(urlDatabase[])
-
+  //console.log(urlDatabase)
+  console.log(urlDatabase[shortURL])
+  console.log(user)
+  if (!user) {
+    return res.status(401).send("Please login to see your urls")
+  }
+  if (urlDatabase[shortURL]) {
+  
   const templateVars = { 
     user,
     shortURL: shortURL, 
     longURL: urlDatabase[shortURL].longURL
   };
   //console.log(urlDatabase[shortURL].longURL);
-  if (urlDatabase[shortURL] !== undefined) {
     res.render("urls_show", templateVars);
   } else {
     res.status = 404;
@@ -190,15 +205,16 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/urls", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId]; 
-  let userDB = {};
-  if (user) {
-    for (const shortURL in urlDatabase) {
-       //console.log(urlDatabase)
-      if (urlDatabase[shortURL].userID === userId) {
-        userDB[shortURL] = urlDatabase[shortURL].longURL;
-      }
-    };
+  if (!user) {
+    return res.status(401).send("Please login to see your urls")
   }
+  const userDB = urlsForUser(userId);
+    // for (const shortURL in urlDatabase) {
+    //    //console.log(urlDatabase)
+    //   if (urlDatabase[shortURL].userID === userId) {
+    //     userDB[shortURL] = urlDatabase[shortURL].longURL;
+    //   }
+  
   //console.log(userId);
   const templateVars = { 
     user,
