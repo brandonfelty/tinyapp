@@ -101,18 +101,25 @@ app.post("/logout", (req, res) => {
   res.redirect('/urls');
 });
 
-app.post("/urls/:shortURL", (req, res) => {
+app.post("/urls/:id", (req, res) => {
   const userId = req.cookies["user_id"];
-  const shortURL = req.params.shortURL;
+  const shortURL = req.params.id;
   const longURL = req.body.newLongURL;
   const user = users[userId];
 
+  // Checks if the user is logged in and returns HTML with error if they're not
   if (!user) {
-    return res.status(401).send("You are not authorized to edit this short URL")
+    return res.status(401).send("Please login to edit URLs <a href=\"/login\" >Login</a>")
   }
 
+  // If user is logged in but does not own the URL for the given ID return html with error message
+  const userDB = urlsForUser(userId);
+  if (!userDB[shortURL]) {
+    return res.status(401).send("You are not authorized to edit this short URL");
+  }
+
+  // If user is logged in and owns the URLs the existing long URL is updated and the user is redirected to /urls/:id
   urlDatabase[shortURL].longURL = longURL;
-    
   res.redirect(`/urls/${shortURL}`)
 });
 
@@ -138,8 +145,7 @@ app.post("/urls", (req, res) => {
   }
   
   // If the user is logged in, a shortURL is generated and then the user is redirected to /urls/:id
-  const shortURL = urlDatabase[generatedURL];
-  shortURL = {
+  urlDatabase[generatedURL] = {
     longURL: req.body.longURL,
     userID: userId  
   }
@@ -180,6 +186,15 @@ app.get("/u/:id", (req, res) => {
   res.status(404).send("Short URL does not exist");
 });
 
+app.get("/urls/new", (req, res) => {
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+  
+  // checks if the user is logged in or send to login page
+  if (!user) {
+    return res.redirect("/login");
+  }
+
 app.get("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   const userId = req.cookies["user_id"];
@@ -204,14 +219,7 @@ app.get("/urls/:id", (req, res) => {
   }
 });
 
-app.get("/urls/new", (req, res) => {
-  const userId = req.cookies["user_id"];
-  const user = users[userId];
-  
-  // checks if the user is logged in or send to login page
-  if (!user) {
-    return res.redirect("/login");
-  }
+
 
   const templateVars = {
     user
