@@ -115,7 +115,6 @@ app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = req.body.newLongURL;
   const user = users[userId];
-  console.log(req.body)
 
   // Checks if the user is logged in and returns HTML with error if they're not
   if (!user) {
