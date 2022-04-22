@@ -1,7 +1,8 @@
 const { assert } = require('chai');
-
 const { searchForEmail } = require('../helpers.js');
 
+
+// Test user database
 const testUsers = {
   "userRandomID": {
     id: "userRandomID", 
@@ -15,6 +16,7 @@ const testUsers = {
   }
 };
 
+// Testing conditions
 describe('getUserByEmail', function() {
   it('should return a user with valid email', () => {
     const user = searchForEmail(testUsers, "user@example.com");
