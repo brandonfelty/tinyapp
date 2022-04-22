@@ -172,9 +172,11 @@ app.get("/u/:id", (req, res) => {
 
   // searches through the short URL's in database and redirects to the long URL if it exists
   for (const key in urlDatabase) {
+    console.log(key)
     if (key === shortURL) {
       const longURL = urlDatabase[shortURL].longURL;
-      return res.redirect(`https://${longURL}`);
+      console.log(longURL);
+      return res.redirect(longURL);
     }
   }
 
