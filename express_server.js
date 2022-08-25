@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
 const helpers = require('./helpers.js');
-
+const methodOverride = require('method-override');
 const app = express();
 const PORT = 8080;
 const generateRandomString = helpers.generateRandomString;
@@ -14,6 +14,7 @@ app.set("view engine", "ejs");
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({name: 'session', keys: ['secretKey']}));
+app.use(methodOverride('_method'));
 
 const urlDatabase = {};
 const users = {};
@@ -74,7 +75,7 @@ app.post("/login", (req, res) => {
   return res.redirect('/urls');
 });
 
-app.post("/urls/:id/delete", (req, res) =>{
+app.delete("/urls/:id", (req, res) =>{
   const shortURL = req.params.id;
   const userId = req.session.user_id;
   const user = users[userId];
