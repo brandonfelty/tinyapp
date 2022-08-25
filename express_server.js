@@ -19,7 +19,7 @@ app.use(methodOverride('_method'));
 const urlDatabase = {};
 const users = {};
 
-app.post("/logout", (req, res) => {
+app.delete("/logout", (req, res) => {
 
   // Clears user cookie session and redirects to /urls
   req.session = null;

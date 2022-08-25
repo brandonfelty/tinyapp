@@ -14,7 +14,7 @@
           <a href="/register"> Register </a>
           <a href="/login"> Login </a>
         <% } else { %>
-          <form action="/logout" method="post">
+          <form action="/logout?_method=DELETE" method="post">
             <label for="edit"> Logged In As: <%=user["email"]%></label>
             <input type="submit" value="logout"> 
           </form>
