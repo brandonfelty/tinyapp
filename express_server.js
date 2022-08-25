@@ -96,7 +96,7 @@ app.delete("/urls/:id", (req, res) =>{
   res.redirect("/urls");
 });
 
-app.post("/urls/:id", (req, res) => {
+app.put("/urls/:id", (req, res) => {
   const userId = req.session.user_id;
   const shortURL = req.params.id;
   const longURL = req.body.newLongURL;
